@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Election Highlights</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0f1117; --surface: #1a1d27; --surface2: #20243a; --border: #2a2d3a; --border2: #353a50;
+  --text: #e8eaf0; --muted: #8890a8; --accent: #3a8fd4; --accent-bg: rgba(58,143,212,.12);
+  --dem: #3d82d4; --rep: #d24a3c; --green: #2fb36b; --amber: #f0a500; --radius: 6px;
+  --font: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'DM Mono', ui-monospace, Consolas, monospace;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 14px; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+#mock { background: var(--amber); color: #15161c; font-weight: 600; font-size: 13px; text-align: center; padding: 6px 16px; }
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 0; }
+header .wrap { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 19px; font-weight: 700; }
+h2 { margin: 26px 0 10px; font-size: 15px; font-weight: 700; }
+.sub { font-size: 12.5px; color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; min-width: 0; }
+.card .top { display: flex; justify-content: space-between; gap: 6px; align-items: center; }
+.card .cd { font-weight: 700; font-size: 15px; }
+.pill { font-size: 11.5px; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: var(--surface2); color: var(--muted); white-space: nowrap; }
+.pill.d { background: rgba(61,130,212,.2); color: #7db3ee; }
+.pill.r { background: rgba(210,74,60,.2); color: #ee8d83; }
+.pill.close { background: rgba(240,165,0,.18); color: var(--amber); }
+.pill.called { background: rgba(47,179,107,.18); color: var(--green); }
+.who { margin: 6px 0 8px; font-size: 13px; }
+.bar { height: 7px; border-radius: 4px; background: var(--rep); overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--dem); }
+.pct { display: flex; justify-content: space-between; font-size: 13px; margin-top: 5px; }
+.stat { display: flex; justify-content: space-between; gap: 8px; font-size: 12.5px; color: var(--muted); margin-top: 5px; }
+.stat b { color: var(--text); font-weight: 500; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 4px 11px; font-size: 12.5px; cursor: pointer; color: var(--muted); }
+.chip.on { background: var(--accent-bg); border-color: var(--accent); color: var(--text); }
+.nug { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border2); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 7px; }
+.nug.firm { border-left-color: var(--green); }
+.nug.partial { border-left-color: var(--amber); }
+.nug.early { border-left-color: var(--accent); }
+.nug .tag { grid-column: 1; font-size: 11.5px; color: var(--muted); }
+.nug .txt { grid-column: 1; font-size: 13.5px; line-height: 1.45; }
+.copy { grid-column: 2; grid-row: 1 / 3; align-self: start; background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px; padding: 3px 9px; font-size: 12px; cursor: pointer; }
+.key { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.key i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+th, td { padding: 7px 8px; text-align: right; border-bottom: 1px solid var(--border); overflow-wrap: anywhere; }
+th { color: var(--muted); font-weight: 500; font-size: 12px; background: var(--surface2); }
+th:first-child, td:first-child { text-align: left; width: 34%; }
+tr:last-child td { border-bottom: 0; }
+.up { color: #7db3ee; } .dn { color: #ee8d83; }
+.note { font-size: 12.5px; color: var(--muted); line-height: 1.45; margin: 8px 0 0; }
+.sources { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.sources h3 { margin: 0 0 6px; font-size: 13px; }
+.sources a { display: block; color: #7db3ee; text-decoration: none; font-size: 13px; padding: 2.5px 0; }
+.sources a span { color: var(--muted); }
+footer { margin: 30px 0 40px; }
+.hide-phone { }
+[hidden] { display: none !important; }
+.tabs { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+.tabs .wrap { display: flex; gap: 4px; }
+.tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 12px; color: var(--muted); font-weight: 600; cursor: pointer; }
+.tab.on { color: var(--text); border-bottom-color: var(--accent); }
+.tab .n { margin-left: 5px; font-size: 11.5px; color: var(--muted); font-weight: 500; pointer-events: none; }
+.fi { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border2); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 7px; }
+.fi.call { border-color: var(--green); border-left-width: 6px; background: rgba(47,179,107,.2); }
+.fi.commentary { border-left-color: #9a83c9; }
+.fi.analysis { border-left-color: var(--accent); }
+.fi.forecast { border-left-color: var(--amber); }
+.fi .when { font-size: 12.5px; color: var(--muted); line-height: 1.35; }
+.fi .when b { display: block; color: var(--text); font-weight: 600; font-size: 13.5px; }
+.fi .meta { font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+.fi .meta strong { color: var(--text); font-weight: 600; }
+.fi .kind { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; margin-right: 6px; }
+.fi.call .kind { background: var(--green); color: #06170d; font-weight: 700; padding: 2px 7px; border-radius: 3px; text-transform: none; letter-spacing: 0; font-size: 12px; }
+.fi a.ttl { color: var(--text); font-size: 14px; font-weight: 500; line-height: 1.4; text-decoration: none; overflow-wrap: anywhere; }
+.fi a.ttl:hover { color: #7db3ee; text-decoration: underline; }
+.fi .body { font-size: 13px; color: #b9bfd0; line-height: 1.45; margin-top: 3px; overflow-wrap: anywhere; }
+.fi .src { font-size: 12px; color: #7db3ee; text-decoration: none; display: block; margin-top: 4px; }
+.warn { background: rgba(240,165,0,.1); border: 1px solid rgba(240,165,0,.35); color: #f3c766; border-radius: var(--radius); padding: 8px 12px; font-size: 13px; margin-bottom: 10px; }
+@media (max-width: 900px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .sources { grid-template-columns: 1fr; } }
+@media (max-width: 560px) {
+  .cards { grid-template-columns: 1fr; }
+  .fi { grid-template-columns: 1fr; gap: 3px; }
+  .fi .when b { display: inline; margin-right: 5px; }
+  .fi .when br { display: none; }
+  .hide-phone { display: none; }
+  th:first-child, td:first-child { width: 42%; }
+  th, td { padding: 7px 5px; font-size: 12px; }
+}
+</style>
+</head>
+<body>
+<div id="mock" hidden>MOCK DATA: invented votes for layout review, not real results</div>
+<header><div class="wrap">
+  <h1>Election Highlights</h1>
+  <div class="sub" id="stamp">Loading</div>
+</div></header>
+<nav class="tabs"><div class="wrap">
+  <button class="tab on" data-tab="results">Results</button>
+  <button class="tab" data-tab="feed">Live Feed<span class="n" id="feed-n"></span></button>
+</div></nav>
+<main class="wrap" id="tab-results">
+  <div class="cards" id="cards"></div>
+
+  <h2>Findings</h2>
+  <div class="key">
+    <span><i style="background:var(--green)"></i>Firm: localities with early and Election Day votes in</span>
+    <span><i style="background:var(--amber)"></i>Partial: Election Day votes only</span>
+    <span><i style="background:var(--accent)"></i>Early vote: who has voted, not how</span>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div id="nuggets"></div>
+
+  <h2>Against each benchmark</h2>
+  <div class="table" id="bench"></div>
+  <p class="note">Democratic two-party share, in points, for fully counted localities only, weighted to the votes cast there. Baseline is the 2026 modeled expectation. All four districts use the 2022 and 2024 lines, so House comparisons are like for like.</p>
+
+  <h2 id="loc-h">Counties and cities</h2>
+  <div class="filters" id="loc-filters"></div>
+  <div class="table" id="locs"></div>
+
+  <h2>Precinct groups</h2>
+  <div class="table" id="bands"></div>
+  <p class="note">Election Day votes only, because early votes are not split by precinct on the night. Shows how far each group of precincts moved compared with other precincts in that CD. These describe places, not how individual voters of any group voted. Groups use VAN modeled race and age.</p>
+
+  <h2>Who voted early, compared with 2025</h2>
+  <div class="table" id="early"></div>
+  <p class="note">Share of returned early ballots, and the change from the final 2025 early vote. Race is VAN modeled. Election Day voters are not included until the state releases its voter history file.</p>
+
+  <footer class="note" id="foot"></footer>
+</main>
+
+<main class="wrap" id="tab-feed" hidden>
+  <h2>What's happening, newest first</h2>
+  <div class="filters" id="feed-cds"></div>
+  <div class="filters" id="feed-kinds"></div>
+  <div id="feed-warn"></div>
+  <div id="feed"></div>
+  <h2>Check these directly</h2>
+  <p class="note" style="margin-bottom:10px">X posts come in automatically from 6 PM to midnight on election night. Race cards still change only when a call is entered by hand.</p>
+  <div class="sources">
+    <div><h3>Calls</h3>
+      <a href="https://x.com/AP" target="_blank" rel="noopener">@AP <span>reference call; moved here Aug 25</span></a>
+      <a href="https://x.com/DecisionDeskHQ" target="_blank" rel="noopener">@DecisionDeskHQ <span>independent</span></a>
+      <a href="https://x.com/NBCNews" target="_blank" rel="noopener">@NBCNews <span>own desk</span></a>
+      <a href="https://x.com/SteveKornacki" target="_blank" rel="noopener">@SteveKornacki <span>live analysis</span></a>
+      <a href="https://x.com/FoxNewsPolitics" target="_blank" rel="noopener">@FoxNewsPolitics <span>own desk</span></a>
+    </div>
+    <div><h3>Virginia analysis</h3>
+      <a href="https://x.com/DwayneYancey" target="_blank" rel="noopener">@DwayneYancey <span>Cardinal, CD 5 and 6</span></a>
+      <a href="https://x.com/JMilesColeman" target="_blank" rel="noopener">@JMilesColeman <span>Crystal Ball</span></a>
+      <a href="https://x.com/kkondik" target="_blank" rel="noopener">@kkondik <span>Crystal Ball</span></a>
+      <a href="https://x.com/ChazNuttycombe" target="_blank" rel="noopener">@ChazNuttycombe <span>forecast, not a call</span></a>
+      <a href="https://x.com/JeffESchapiro" target="_blank" rel="noopener">@JeffESchapiro <span>analysis</span></a>
+    </div>
+    <div><h3>Reporting by district</h3>
+      <a href="https://x.com/Jaaavis" target="_blank" rel="noopener">@Jaaavis <span>Virginia Scope, CD 1</span></a>
+      <a href="https://x.com/WTKR3" target="_blank" rel="noopener">@WTKR3 <span>CD 2</span></a>
+      <a href="https://www.29news.com/" target="_blank" rel="noopener">29News <span>CD 5</span></a>
+      <a href="https://www.wsls.com/" target="_blank" rel="noopener">WSLS <span>CD 5 and 6</span></a>
+      <a href="https://cardinalnews.org/" target="_blank" rel="noopener">Cardinal News <span>CD 5 and 6</span></a>
+    </div>
+  </div>
+  <footer class="note" id="feed-foot"></footer>
+</main>
+
+<script>
+"use strict";
+const REFRESH_MS = 60000;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const fmt = n => n == null ? "—" : Number(n).toLocaleString("en-US");
+const last = n => n.replace(/"[^"]*"/g, " ").replace(/,?\s+(Jr\.?|Sr\.?|II|III|IV)\s*$/i, "").trim().split(/\s+/).pop();
+const signed = v => v == null ? "—" : `<span class="num ${v > 0 ? "up" : v < 0 ? "dn" : ""}">${v > 0 ? "+" : ""}${Number(v).toFixed(1)}</span>`;
+const S = { filter: "all", loc: 2, tab: location.hash === "#live" ? "feed" : "results", fcd: "all", fkind: "all" };
+let D = null, F = null;
+const KINDS = { call: "Calls", reporting: "Reporting", analysis: "Analysis", commentary: "Commentary", forecast: "Forecast" };
+const safeHref = u => /^https?:\/\//i.test(u || "") ? esc(u) : "#";
+const etDate = iso => new Date(iso).toLocaleDateString("en-US", { timeZone: "America/New_York", month: "short", day: "numeric" });
+const etTime = iso => new Date(iso).toLocaleTimeString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
+const host = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch (_) { return "source"; } };
+
+function feed() {
+  if (!F) return;
+  $("#feed-n").textContent = F.items.length ? F.items.length : "";
+  const cd = [["all", "All races"], [1, "CD 1"], [2, "CD 2"], [5, "CD 5"], [6, "CD 6"]];
+  $("#feed-cds").innerHTML = cd.map(([k, l]) => `<button class="chip ${S.fcd === k ? "on" : ""}" data-fcd="${k}">${l}</button>`).join("");
+  const kinds = [["all", "Everything"], ...Object.entries(KINDS)];
+  $("#feed-kinds").innerHTML = kinds.map(([k, l]) => `<button class="chip ${S.fkind === k ? "on" : ""}" data-fkind="${k}">${l}</button>`).join("");
+  const bad = F.sources.filter(s => !s.ok);
+  const age = (Date.now() - new Date(F.checked)) / 60000;
+  const warn = [];
+  if (age > (Date.now() < Date.parse("2026-11-04T07:00:00Z") ? 25 : 90)) warn.push(`The feed has not updated in ${Math.round(age)} minutes.`);
+  if (bad.length) warn.push(`Not responding: ${bad.map(s => esc(s.source)).join(", ")}.`);
+  $("#feed-warn").innerHTML = warn.length ? `<div class="warn">${warn.join(" ")}</div>` : "";
+  const rows = F.items.filter(i => (S.fcd === "all" || (i.cds || []).includes(S.fcd)) && (S.fkind === "all" || i.kind === S.fkind));
+  $("#feed").innerHTML = rows.length ? rows.map(i => {
+    const when = i.exact ? i.t : i.seen;
+    const tags = (i.cds || []).map(c => `CD ${c}`).join(", ");
+    const head = i.title || i.text;
+    return `<article class="fi ${esc(i.kind)}">
+      <div class="when"><b>${etTime(when)}</b>${etDate(when)}${i.exact ? "" : "<br> first seen"}</div>
+      <div><div class="meta"><span class="kind">${i.test ? "Test " : ""}${i.kind === "call" ? `Called by ${esc(i.by)}` : esc(KINDS[i.kind] || i.kind)}</span>${i.kind === "call" ? "" : `<strong>${esc(i.by)}</strong>`}${tags ? ` · ${tags}` : ""}${i.via ? ` · via ${esc(i.via)}` : ""}</div>
+      <a class="ttl" href="${safeHref(i.url)}" target="_blank" rel="noopener nofollow">${esc(head)}</a>
+      ${i.title && i.text ? `<div class="body">${esc(i.text)}</div>` : ""}
+      <a class="src" href="${safeHref(i.url)}" target="_blank" rel="noopener nofollow">${esc(host(i.url))} ↗</a></div>
+    </article>`; }).join("") : `<p class="muted">Nothing here yet. Items appear as sources post them.</p>`;
+  const ok = F.sources.filter(s => s.ok).length;
+  $("#feed-foot").textContent = `Checked ${etTime(F.checked)} ET. ${ok} of ${F.sources.length} automatic sources responding. We report who made a call; we do not make calls. Call labels come from the wording of each post, so open the source to confirm.`;
+  if (D) cards();
+}
+
+function showTab() {
+  document.querySelectorAll(".tab").forEach(b => b.classList.toggle("on", b.dataset.tab === S.tab));
+  $("#tab-results").hidden = S.tab !== "results";
+  $("#tab-feed").hidden = S.tab !== "feed";
+}
+
+function cards() {
+  $("#cards").innerHTML = D.cds.map(c => {
+    const call = F?.calls?.[`cd${c.cd}`];
+    const cls = call ? "called" : { "Leaning D": "d", "Leaning R": "r", Close: "close" }[c.status] || "";
+    const pct = c.pct == null ? 50 : c.pct;
+    const lead = c.lead > 0 ? `${last(c.dname)} up ${fmt(c.lead)}` : c.lead < 0 ? `${last(c.rname)} up ${fmt(-c.lead)}` : "No votes yet";
+    return `<div class="card">
+      <div class="top"><span class="cd">CD ${c.cd}</span><span class="pill ${cls}">${esc(call ? `${call.test ? "TEST: " : ""}Called by ${call.by}: ${call.winner}` : c.status)}</span></div>
+      <div class="who">${esc(last(c.dname))} v. ${esc(last(c.rname))}</div>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="pct num"><span>${c.pct == null ? "—" : c.pct.toFixed(1) + "%"}</span><span>${c.pct == null ? "—" : (100 - c.pct).toFixed(1) + "%"}</span></div>
+      <div class="stat"><span>Counted so far</span><b class="num">${esc(lead)}</b></div>
+      <div class="stat"><span>Precincts in</span><b class="num">${c.precincts_pct}%</b></div>
+      <div class="stat"><span>Early ballots still out</span><b class="num">${fmt(c.early_out)}</b></div>
+      <div class="stat"><span>Estimated D share</span><b class="num">${c.estimate == null ? "—" : c.estimate.toFixed(1) + "%"}</b></div>
+      <div class="stat"><span>Baseline</span><b class="num">${c.bench.base.toFixed(1)}%</b></div>
+    </div>`;
+  }).join("");
+}
+
+function nuggets() {
+  const opts = [["all", "All"], ...D.cds.map(c => [c.cd, `CD ${c.cd}`])];
+  $("#filters").innerHTML = opts.map(([k, l]) => `<button class="chip ${S.filter === k ? "on" : ""}" data-f="${k}">${l}</button>`).join("");
+  const rows = D.nuggets.filter(n => S.filter === "all" || n.cd === S.filter || n.cd == null);
+  $("#nuggets").innerHTML = rows.length ? rows.map((n, i) => `<div class="nug ${n.level}">
+      <div class="tag">${esc(n.topic)}</div><div class="txt" id="n${i}">${esc(n.text)}</div>
+      <button class="copy" data-n="n${i}">Copy</button></div>`).join("")
+    : `<p class="muted">No findings yet. They appear once localities finish counting.</p>`;
+}
+
+function bench() {
+  const keys = Object.keys(D.bench_labels);
+  const head = keys.map((k, i) => `<th class="${i > 2 ? "hide-phone" : ""}">${esc(D.bench_labels[k])}</th>`).join("");
+  $("#bench").innerHTML = `<table><tr><th>District</th>${head}</tr>` + D.cds.map(c =>
+    `<tr><td>CD ${c.cd} <span class="muted">${c.comparable_share}% counted</span></td>${keys.map((k, i) => `<td class="${i > 2 ? "hide-phone" : ""}">${signed(c.swings[k])}</td>`).join("")}</tr>`).join("") + `</table>`;
+}
+
+function locs() {
+  $("#loc-filters").innerHTML = D.cds.map(c => `<button class="chip ${S.loc === c.cd ? "on" : ""}" data-l="${c.cd}">CD ${c.cd}</button>`).join("");
+  const c = D.cds.find(x => x.cd === S.loc);
+  const rows = c.localities.filter(x => x.votes);
+  $("#locs").innerHTML = `<table><tr><th>Locality</th><th>D %</th><th>vs Baseline</th><th>vs House '24</th><th class="hide-phone">Precincts</th><th class="hide-phone">Early votes</th></tr>` +
+    (rows.length ? rows.map(x => `<tr><td>${esc(x.name)}${x.comparable ? "" : ' <span class="muted">partial</span>'}</td>
+      <td class="num">${x.pct.toFixed(1)}</td>
+      <td>${x.comparable ? signed(x.vs.base) : "—"}</td><td>${x.comparable ? signed(x.vs.hse24) : "—"}</td>
+      <td class="num hide-phone">${x.reporting}%</td><td class="hide-phone">${x.early === "all-reported" || x.early === "final" ? "In" : x.early === "not-reported" ? "Not in" : "Part"}</td></tr>`).join("")
+      : `<tr><td colspan="6" class="muted">No votes yet.</td></tr>`) + `</table>`;
+}
+
+function bands() {
+  const defs = D.cds[0].bands.map(b => [b.key, b.label]);
+  $("#bands").innerHTML = `<table><tr><th>Precinct group</th>${D.cds.map(c => `<th>CD ${c.cd}</th>`).join("")}</tr>` + defs.map(([k, l]) =>
+    `<tr><td>${esc(l)}</td>${D.cds.map(c => { const b = c.bands.find(x => x.key === k);
+      return `<td>${b.gap == null || b.precincts < 8 ? '<span class="muted">—</span>' : signed(b.gap)}</td>`; }).join("")}</tr>`).join("") + `</table>`;
+}
+
+function early() {
+  const first = D.cds.find(c => c.early.length);
+  if (!first) { $("#early").innerHTML = `<p class="note" style="padding:0 12px 10px">Not available.</p>`; return; }
+  $("#early").innerHTML = `<table><tr><th>Group</th>${D.cds.map(c => `<th>CD ${c.cd}</th>`).join("")}</tr>` + first.early.map(g =>
+    `<tr><td>${esc(g.label)}</td>${D.cds.map(c => { const e = c.early.find(x => x.key === g.key);
+      return `<td>${e ? `<span class="num">${e.now.toFixed(1)}%</span> ${signed(e.chg)}` : "—"}</td>`; }).join("")}</tr>`).join("") + `</table>`;
+}
+
+function render() {
+  $("#mock").hidden = !D.mock;
+  $("#stamp").textContent = `Findings updated ${D.updated}. ENR data from ${D.source_updated || "—"}.`;
+  $("#foot").textContent = "Race cards show a call only after staff enter it from a named source. We report calls; we do not make them. Status labels are our own read of the counted vote, not calls.";
+  cards(); nuggets(); bench(); locs(); bands(); early();
+}
+
+document.addEventListener("click", async e => {
+  const t = e.target;
+  if (t.dataset.tab) { S.tab = t.dataset.tab; history.replaceState(null, "", S.tab === "feed" ? "#live" : "#"); showTab(); window.scrollTo(0, 0); }
+  if (t.dataset.fcd) { S.fcd = t.dataset.fcd === "all" ? "all" : Number(t.dataset.fcd); feed(); }
+  if (t.dataset.fkind) { S.fkind = t.dataset.fkind; feed(); }
+  if (t.dataset.f) { S.filter = t.dataset.f === "all" ? "all" : Number(t.dataset.f); nuggets(); }
+  if (t.dataset.l) { S.loc = Number(t.dataset.l); locs(); }
+  if (t.dataset.n) {
+    try { await navigator.clipboard.writeText($("#" + t.dataset.n).textContent); t.textContent = "Copied"; }
+    catch (_) { t.textContent = "Select text"; }
+    setTimeout(() => { t.textContent = "Copy"; }, 1500);
+  }
+});
+
+async function load() {
+  // Fetched separately so a problem with one never blanks the other tab.
+  try {
+    const r = await fetch(`data/feed.json?t=${Date.now()}`);
+    if (!r.ok) throw new Error(r.status);
+    F = await r.json();
+    feed();
+  } catch (err) {
+    $("#feed").innerHTML = `<p class="muted">Could not load the feed (${esc(err.message)}). Retrying in 60 seconds.</p>`;
+  }
+  try {
+    const r = await fetch(`data/highlights.json?t=${Date.now()}`);
+    if (!r.ok) throw new Error(r.status);
+    D = await r.json();
+    render();
+  } catch (err) {
+    $("#stamp").textContent = `Could not load findings (${err.message}). Retrying in 60 seconds.`;
+  }
+}
+showTab();
+load();
+setInterval(load, REFRESH_MS);
+</script>
+</body>
+</html>
