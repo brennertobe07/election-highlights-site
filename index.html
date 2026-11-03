@@ -99,8 +99,9 @@ footer { margin: 30px 0 40px; }
   .fi .when b { display: inline; margin-right: 5px; }
   .fi .when br { display: none; }
   .hide-phone { display: none; }
-  th:first-child, td:first-child { width: 42%; }
-  th, td { padding: 7px 5px; font-size: 12px; }
+  th:first-child, td:first-child { width: 34%; }
+  th, td { padding: 7px 4px; font-size: 12px; }
+  th { font-size: 11px; overflow-wrap: normal; }
 }
 </style>
 </head>
@@ -272,12 +273,12 @@ function locs() {
   $("#loc-filters").innerHTML = D.cds.map(c => `<button class="chip ${S.loc === c.cd ? "on" : ""}" data-l="${c.cd}">CD ${c.cd}</button>`).join("");
   const c = D.cds.find(x => x.cd === S.loc);
   const rows = c.localities.filter(x => x.votes);
+  if (!rows.length) { $("#locs").innerHTML = `<p class="note" style="padding:10px 12px">No votes yet.</p>`; return; }
   $("#locs").innerHTML = `<table><tr><th>Locality</th><th>D %</th><th>vs Baseline</th><th>vs House '24</th><th class="hide-phone">Precincts</th><th class="hide-phone">Early votes</th></tr>` +
-    (rows.length ? rows.map(x => `<tr><td>${esc(x.name)}${x.comparable ? "" : ' <span class="muted">partial</span>'}</td>
+    rows.map(x => `<tr><td>${esc(x.name)}${x.comparable ? "" : ' <span class="muted">partial</span>'}</td>
       <td class="num">${x.pct.toFixed(1)}</td>
       <td>${x.comparable ? signed(x.vs.base) : "—"}</td><td>${x.comparable ? signed(x.vs.hse24) : "—"}</td>
-      <td class="num hide-phone">${x.reporting}%</td><td class="hide-phone">${x.early === "all-reported" || x.early === "final" ? "In" : x.early === "not-reported" ? "Not in" : "Part"}</td></tr>`).join("")
-      : `<tr><td colspan="6" class="muted">No votes yet.</td></tr>`) + `</table>`;
+      <td class="num hide-phone">${x.reporting}%</td><td class="hide-phone">${x.early === "all-reported" || x.early === "final" ? "In" : x.early === "not-reported" ? "Not in" : "Part"}</td></tr>`).join("") + `</table>`;
 }
 
 function bands() {
