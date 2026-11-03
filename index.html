@@ -50,7 +50,6 @@ h2 { margin: 26px 0 10px; font-size: 15px; font-weight: 700; }
 .nug { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border2); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 7px; }
 .nug.firm { border-left-color: var(--green); }
 .nug.partial { border-left-color: var(--amber); }
-.nug.early { border-left-color: var(--accent); }
 .nug .tag { grid-column: 1; font-size: 11.5px; color: var(--muted); }
 .nug .txt { grid-column: 1; font-size: 13.5px; line-height: 1.45; }
 .copy { grid-column: 2; grid-row: 1 / 3; align-self: start; background: var(--surface2); border: 1px solid var(--border2); border-radius: 5px; padding: 3px 9px; font-size: 12px; cursor: pointer; }
@@ -122,7 +121,6 @@ footer { margin: 30px 0 40px; }
   <div class="key">
     <span><i style="background:var(--green)"></i>Firm: localities with early and Election Day votes in</span>
     <span><i style="background:var(--amber)"></i>Partial: Election Day votes only</span>
-    <span><i style="background:var(--accent)"></i>Early vote: who has voted, not how</span>
   </div>
   <div class="filters" id="filters"></div>
   <div id="nuggets"></div>
@@ -137,11 +135,7 @@ footer { margin: 30px 0 40px; }
 
   <h2>Precinct groups</h2>
   <div class="table" id="bands"></div>
-  <p class="note">Election Day votes only, because early votes are not split by precinct on the night. Shows how far each group of precincts moved compared with other precincts in that CD. These describe places, not how individual voters of any group voted. Groups use VAN modeled race and age.</p>
-
-  <h2>Who voted early, compared with 2025</h2>
-  <div class="table" id="early"></div>
-  <p class="note">Share of returned early ballots, and the change from the final 2025 early vote. Race is VAN modeled. Election Day voters are not included until the state releases its voter history file.</p>
+  <p class="note">Election Day votes only, because early votes are not split by precinct on the night. Shows how far each group of precincts moved compared with other precincts in that CD. A dash means fewer than 8 precincts in that group have reported. These describe places, not how individual voters of any group voted. Groups use VAN modeled race and age.</p>
 
   <footer class="note" id="foot"></footer>
 </main>
@@ -153,7 +147,7 @@ footer { margin: 30px 0 40px; }
   <div id="feed-warn"></div>
   <div id="feed"></div>
   <h2>Check these directly</h2>
-  <p class="note" style="margin-bottom:10px">X posts come in automatically from 6 PM to midnight on election night. Race cards still change only when a call is entered by hand.</p>
+  <p class="note" style="margin-bottom:10px">X posts come in automatically from 6 PM to midnight on election night. The district summaries on the Results tab change only when a call is entered by hand.</p>
   <div class="sources">
     <div><h3>Calls</h3>
       <a href="https://x.com/AP" target="_blank" rel="noopener">@AP <span>reference call; moved here Aug 25</span></a>
@@ -288,19 +282,11 @@ function bands() {
       return `<td>${b.gap == null || b.precincts < 8 ? '<span class="muted">—</span>' : signed(b.gap)}</td>`; }).join("")}</tr>`).join("") + `</table>`;
 }
 
-function early() {
-  const first = D.cds.find(c => c.early.length);
-  if (!first) { $("#early").innerHTML = `<p class="note" style="padding:0 12px 10px">Not available.</p>`; return; }
-  $("#early").innerHTML = `<table><tr><th>Group</th>${D.cds.map(c => `<th>CD ${c.cd}</th>`).join("")}</tr>` + first.early.map(g =>
-    `<tr><td>${esc(g.label)}</td>${D.cds.map(c => { const e = c.early.find(x => x.key === g.key);
-      return `<td>${e ? `<span class="num">${e.now.toFixed(1)}%</span> ${signed(e.chg)}` : "—"}</td>`; }).join("")}</tr>`).join("") + `</table>`;
-}
-
 function render() {
   $("#mock").hidden = !D.mock;
   $("#stamp").textContent = `Findings updated ${D.updated}. ENR data from ${D.source_updated || "—"}.`;
-  $("#foot").textContent = "Race cards show a call only after staff enter it from a named source. We report calls; we do not make them. Status labels are our own read of the counted vote, not calls.";
-  cards(); nuggets(); bench(); locs(); bands(); early();
+  $("#foot").textContent = "District summaries show a call only after staff enter it from a named source. We report calls; we do not make them. Status labels are our own read of the counted vote, not calls.";
+  cards(); nuggets(); bench(); locs(); bands();
 }
 
 document.addEventListener("click", async e => {
