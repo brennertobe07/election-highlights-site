@@ -90,6 +90,10 @@ footer { margin: 30px 0 40px; }
 .fi.call.other .kind { background: var(--accent-bg); color: #7db3ee; }
 .fi .when .st { display: block; margin-top: 6px; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: .02em; color: var(--green); }
 .fi.call.other .when .st { color: #7db3ee; }
+.fi .when .pty { display: inline-block; margin-top: 6px; padding: 3px 8px; border-radius: 4px; font-size: 20px; font-weight: 800; line-height: 1.1; color: #fff; }
+.fi .when .pty.D { background: var(--dem); }
+.fi .when .pty.R { background: var(--rep); }
+.fi .when .pty.I { background: #6b7288; }
 .fi a.ttl { color: var(--text); font-size: 14px; font-weight: 500; line-height: 1.4; text-decoration: none; overflow-wrap: anywhere; }
 .fi a.ttl:hover { color: #7db3ee; text-decoration: underline; }
 .fi .body { font-size: 13px; color: #b9bfd0; line-height: 1.45; margin-top: 3px; overflow-wrap: anywhere; }
@@ -102,6 +106,7 @@ footer { margin: 30px 0 40px; }
   .fi .when b { display: inline; margin-right: 5px; }
   .fi .when br { display: none; }
   .fi .when .st { display: inline-block; margin: 0 0 0 8px; font-size: 24px; vertical-align: middle; }
+  .fi .when .pty { margin: 0 0 0 8px; font-size: 18px; vertical-align: middle; }
   .hide-phone { display: none; }
   th:first-child, td:first-child { width: 34%; }
   th, td { padding: 7px 4px; font-size: 12px; }
@@ -214,7 +219,7 @@ function feed() {
     const tags = (i.cds || []).map(c => `CD ${c}`).join(", ") || (i.kind === "call" && i.va ? "Virginia" : "");
     const head = i.title || i.text;
     return `<article class="fi ${esc(i.kind)}${i.kind === "call" && !i.va ? " other" : ""}">
-      <div class="when"><b>${etTime(when)}</b>${etDate(when)}${i.exact ? "" : "<br> first seen"}${i.kind === "call" && i.state ? `<span class="st">${esc(i.state)}</span>` : ""}</div>
+      <div class="when"><b>${etTime(when)}</b>${etDate(when)}${i.exact ? "" : "<br> first seen"}${i.kind === "call" && i.state ? `<span class="st">${esc(i.state)}</span>` : ""}${i.kind === "call" && ["D", "R", "I"].includes(i.party) ? `<span class="pty ${i.party}" title="Winner's party, as read from the post">${i.party}</span>` : ""}</div>
       <div><div class="meta"><span class="kind">${i.test ? "Test " : ""}${i.kind === "call" ? `Called by ${esc(i.by)}` : esc(KINDS[i.kind] || i.kind)}</span>${i.kind === "call" ? "" : `<strong>${esc(i.by)}</strong>`}${tags ? ` · ${tags}` : ""}${i.via ? ` · via ${esc(i.via)}` : ""}</div>
       <a class="ttl" href="${safeHref(i.url)}" target="_blank" rel="noopener nofollow">${esc(head)}</a>
       ${i.title && i.text ? `<div class="body">${esc(i.text)}</div>` : ""}
