@@ -206,14 +206,14 @@ function feed() {
   const cd = [["all", "All races"], ["va", "Virginia"], [1, "CD 1"], [2, "CD 2"], [5, "CD 5"], [6, "CD 6"]];
   $("#feed-cds").innerHTML = cd.map(([k, l]) => `<button class="chip ${S.fcd === k ? "on" : ""}" data-fcd="${k}">${l}</button>`).join("");
   const kinds = [["all", "Everything"], ...Object.entries(KINDS)];
-  $("#feed-kinds").innerHTML = kinds.map(([k, l]) => `<button class="chip ${S.fkind === k ? "on" : ""}" data-fkind="${k}">${l}</button>`).join("");
+  $("#feed-kinds").innerHTML = [...kinds, ["ap", "AP calls"]].map(([k, l]) => `<button class="chip ${S.fkind === k ? "on" : ""}" data-fkind="${k}">${l}</button>`).join("");
   const bad = F.sources.filter(s => !s.ok);
   const age = (Date.now() - new Date(F.checked)) / 60000;
   const warn = [];
   if (age > (Date.now() < Date.parse("2026-11-04T07:00:00Z") ? 25 : 90)) warn.push(`The feed has not updated in ${Math.round(age)} minutes.`);
   if (bad.length) warn.push(`Not responding: ${bad.map(s => esc(s.source)).join(", ")}.`);
   $("#feed-warn").innerHTML = warn.length ? `<div class="warn">${warn.join(" ")}</div>` : "";
-  const rows = F.items.filter(i => (S.fcd === "all" || (S.fcd === "va" ? (i.kind !== "call" || i.va) : (i.cds || []).includes(S.fcd))) && (S.fkind === "all" || i.kind === S.fkind));
+  const rows = F.items.filter(i => (S.fcd === "all" || (S.fcd === "va" ? (i.kind !== "call" || i.va) : (i.cds || []).includes(S.fcd))) && (S.fkind === "all" || (S.fkind === "ap" ? i.ap : i.kind === S.fkind)));
   $("#feed").innerHTML = rows.length ? rows.map(i => {
     const when = i.exact ? i.t : i.seen;
     const tags = (i.cds || []).map(c => `CD ${c}`).join(", ") || (i.kind === "call" && i.va ? "Virginia" : "");
