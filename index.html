@@ -86,6 +86,10 @@ footer { margin: 30px 0 40px; }
 .fi .meta strong { color: var(--text); font-weight: 600; }
 .fi .kind { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; margin-right: 6px; }
 .fi.call .kind { background: var(--green); color: #06170d; font-weight: 700; padding: 2px 7px; border-radius: 3px; text-transform: none; letter-spacing: 0; font-size: 12px; }
+.fi.call.other { background: rgba(58,143,212,.10); border-color: rgba(58,143,212,.45); border-left-color: var(--accent); }
+.fi.call.other .kind { background: var(--accent-bg); color: #7db3ee; }
+.fi .when .st { display: block; margin-top: 6px; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: .02em; color: var(--green); }
+.fi.call.other .when .st { color: #7db3ee; }
 .fi a.ttl { color: var(--text); font-size: 14px; font-weight: 500; line-height: 1.4; text-decoration: none; overflow-wrap: anywhere; }
 .fi a.ttl:hover { color: #7db3ee; text-decoration: underline; }
 .fi .body { font-size: 13px; color: #b9bfd0; line-height: 1.45; margin-top: 3px; overflow-wrap: anywhere; }
@@ -97,6 +101,7 @@ footer { margin: 30px 0 40px; }
   .fi { grid-template-columns: 1fr; gap: 3px; }
   .fi .when b { display: inline; margin-right: 5px; }
   .fi .when br { display: none; }
+  .fi .when .st { display: inline-block; margin: 0 0 0 8px; font-size: 24px; vertical-align: middle; }
   .hide-phone { display: none; }
   th:first-child, td:first-child { width: 34%; }
   th, td { padding: 7px 4px; font-size: 12px; }
@@ -193,7 +198,7 @@ const host = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } ca
 function feed() {
   if (!F) return;
   $("#feed-n").textContent = F.items.length ? F.items.length : "";
-  const cd = [["all", "All races"], [1, "CD 1"], [2, "CD 2"], [5, "CD 5"], [6, "CD 6"]];
+  const cd = [["all", "All races"], ["va", "Virginia"], [1, "CD 1"], [2, "CD 2"], [5, "CD 5"], [6, "CD 6"]];
   $("#feed-cds").innerHTML = cd.map(([k, l]) => `<button class="chip ${S.fcd === k ? "on" : ""}" data-fcd="${k}">${l}</button>`).join("");
   const kinds = [["all", "Everything"], ...Object.entries(KINDS)];
   $("#feed-kinds").innerHTML = kinds.map(([k, l]) => `<button class="chip ${S.fkind === k ? "on" : ""}" data-fkind="${k}">${l}</button>`).join("");
@@ -203,13 +208,13 @@ function feed() {
   if (age > (Date.now() < Date.parse("2026-11-04T07:00:00Z") ? 25 : 90)) warn.push(`The feed has not updated in ${Math.round(age)} minutes.`);
   if (bad.length) warn.push(`Not responding: ${bad.map(s => esc(s.source)).join(", ")}.`);
   $("#feed-warn").innerHTML = warn.length ? `<div class="warn">${warn.join(" ")}</div>` : "";
-  const rows = F.items.filter(i => (S.fcd === "all" || (i.cds || []).includes(S.fcd)) && (S.fkind === "all" || i.kind === S.fkind));
+  const rows = F.items.filter(i => (S.fcd === "all" || (S.fcd === "va" ? (i.kind !== "call" || i.va) : (i.cds || []).includes(S.fcd))) && (S.fkind === "all" || i.kind === S.fkind));
   $("#feed").innerHTML = rows.length ? rows.map(i => {
     const when = i.exact ? i.t : i.seen;
-    const tags = (i.cds || []).map(c => `CD ${c}`).join(", ");
+    const tags = (i.cds || []).map(c => `CD ${c}`).join(", ") || (i.kind === "call" && i.va ? "Virginia" : "");
     const head = i.title || i.text;
-    return `<article class="fi ${esc(i.kind)}">
-      <div class="when"><b>${etTime(when)}</b>${etDate(when)}${i.exact ? "" : "<br> first seen"}</div>
+    return `<article class="fi ${esc(i.kind)}${i.kind === "call" && !i.va ? " other" : ""}">
+      <div class="when"><b>${etTime(when)}</b>${etDate(when)}${i.exact ? "" : "<br> first seen"}${i.kind === "call" && i.state ? `<span class="st">${esc(i.state)}</span>` : ""}</div>
       <div><div class="meta"><span class="kind">${i.test ? "Test " : ""}${i.kind === "call" ? `Called by ${esc(i.by)}` : esc(KINDS[i.kind] || i.kind)}</span>${i.kind === "call" ? "" : `<strong>${esc(i.by)}</strong>`}${tags ? ` · ${tags}` : ""}${i.via ? ` · via ${esc(i.via)}` : ""}</div>
       <a class="ttl" href="${safeHref(i.url)}" target="_blank" rel="noopener nofollow">${esc(head)}</a>
       ${i.title && i.text ? `<div class="body">${esc(i.text)}</div>` : ""}
@@ -292,7 +297,7 @@ function render() {
 document.addEventListener("click", async e => {
   const t = e.target;
   if (t.dataset.tab) { S.tab = t.dataset.tab; history.replaceState(null, "", S.tab === "feed" ? "#live" : "#"); showTab(); window.scrollTo(0, 0); }
-  if (t.dataset.fcd) { S.fcd = t.dataset.fcd === "all" ? "all" : Number(t.dataset.fcd); feed(); }
+  if (t.dataset.fcd) { S.fcd = ["all", "va"].includes(t.dataset.fcd) ? t.dataset.fcd : Number(t.dataset.fcd); feed(); }
   if (t.dataset.fkind) { S.fkind = t.dataset.fkind; feed(); }
   if (t.dataset.f) { S.filter = t.dataset.f === "all" ? "all" : Number(t.dataset.f); nuggets(); }
   if (t.dataset.l) { S.loc = Number(t.dataset.l); locs(); }
