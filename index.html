@@ -137,7 +137,7 @@ footer { margin: 30px 0 40px; }
 
   <h2>Against each benchmark</h2>
   <div class="table" id="bench"></div>
-  <p class="note">Democratic two-party share, in points, for fully counted localities only, weighted to the votes cast there. Baseline is the 2026 modeled expectation. All four districts use the 2022 and 2024 lines, so House comparisons are like for like.</p>
+  <p class="note">Democratic two-party share, in points, for fully counted localities only, weighted to the votes cast there. Baseline is the 2026 modeled expectation. All three districts use the 2022 and 2024 lines, so House comparisons are like for like.</p>
 
   <h2 id="loc-h">Counties and cities</h2>
   <div class="filters" id="loc-filters"></div>
@@ -167,7 +167,7 @@ footer { margin: 30px 0 40px; }
       <a href="https://x.com/FoxNewsPolitics" target="_blank" rel="noopener">@FoxNewsPolitics <span>own desk</span></a>
     </div>
     <div><h3>Virginia analysis</h3>
-      <a href="https://x.com/DwayneYancey" target="_blank" rel="noopener">@DwayneYancey <span>Cardinal, CD 5 and 6</span></a>
+      <a href="https://x.com/DwayneYancey" target="_blank" rel="noopener">@DwayneYancey <span>Cardinal, CD 5</span></a>
       <a href="https://x.com/JMilesColeman" target="_blank" rel="noopener">@JMilesColeman <span>Crystal Ball</span></a>
       <a href="https://x.com/kkondik" target="_blank" rel="noopener">@kkondik <span>Crystal Ball</span></a>
       <a href="https://x.com/ChazNuttycombe" target="_blank" rel="noopener">@ChazNuttycombe <span>forecast, not a call</span></a>
@@ -177,8 +177,8 @@ footer { margin: 30px 0 40px; }
       <a href="https://x.com/Jaaavis" target="_blank" rel="noopener">@Jaaavis <span>Virginia Scope, CD 1</span></a>
       <a href="https://x.com/WTKR3" target="_blank" rel="noopener">@WTKR3 <span>CD 2</span></a>
       <a href="https://www.29news.com/" target="_blank" rel="noopener">29News <span>CD 5</span></a>
-      <a href="https://www.wsls.com/" target="_blank" rel="noopener">WSLS <span>CD 5 and 6</span></a>
-      <a href="https://cardinalnews.org/" target="_blank" rel="noopener">Cardinal News <span>CD 5 and 6</span></a>
+      <a href="https://www.wsls.com/" target="_blank" rel="noopener">WSLS <span>CD 5</span></a>
+      <a href="https://cardinalnews.org/" target="_blank" rel="noopener">Cardinal News <span>CD 5</span></a>
     </div>
   </div>
   <footer class="note" id="feed-foot"></footer>
@@ -203,20 +203,20 @@ const host = u => { try { return new URL(u).hostname.replace(/^www\./, ""); } ca
 function feed() {
   if (!F) return;
   $("#feed-n").textContent = F.items.length ? F.items.length : "";
-  const cd = [["all", "All races"], ["va", "Virginia"], [1, "CD 1"], [2, "CD 2"], [5, "CD 5"], [6, "CD 6"]];
+  const cd = [["all", "All races"], ["va", "Virginia"], [1, "CD 1"], [2, "CD 2"], [5, "CD 5"]];
   $("#feed-cds").innerHTML = cd.map(([k, l]) => `<button class="chip ${S.fcd === k ? "on" : ""}" data-fcd="${k}">${l}</button>`).join("");
   const kinds = [["all", "Everything"], ...Object.entries(KINDS)];
   $("#feed-kinds").innerHTML = [...kinds, ["accepted", "AP / Decision Desk"]].map(([k, l]) => `<button class="chip ${S.fkind === k ? "on" : ""}" data-fkind="${k}">${l}</button>`).join("");
   const bad = F.sources.filter(s => !s.ok);
   const age = (Date.now() - new Date(F.checked)) / 60000;
   const warn = [];
-  if (age > (Date.now() < Date.parse("2026-11-04T07:00:00Z") ? 25 : 90)) warn.push(`The feed has not updated in ${Math.round(age)} minutes.`);
+  if (age > (Date.now() < Date.parse("2026-11-04T07:00:00Z") ? 25 : 900)) warn.push(`The feed has not updated in ${Math.round(age)} minutes.`);
   if (bad.length) warn.push(`Not responding: ${bad.map(s => esc(s.source)).join(", ")}.`);
   $("#feed-warn").innerHTML = warn.length ? `<div class="warn">${warn.join(" ")}</div>` : "";
   const rows = F.items.filter(i => (S.fcd === "all" || (S.fcd === "va" ? (i.kind !== "call" || i.va) : (i.cds || []).includes(S.fcd))) && (S.fkind === "all" || (S.fkind === "accepted" ? i.accepted : i.kind === S.fkind)));
   $("#feed").innerHTML = rows.length ? rows.map(i => {
     const when = i.exact ? i.t : i.seen;
-    const tags = (i.cds || []).map(c => `CD ${c}`).join(", ") || (i.kind === "call" && i.va ? "Virginia" : "");
+    const tags = (i.cds || []).filter(c => c !== 6).map(c => `CD ${c}`).join(", ") || (i.kind === "call" && i.va ? "Virginia" : "");
     const head = i.title || i.text;
     return `<article class="fi ${esc(i.kind)}${i.kind === "call" && !i.va ? " other" : ""}">
       <div class="when"><b>${etTime(when)}</b>${etDate(when)}${i.exact ? "" : "<br> first seen"}${i.kind === "call" && i.state ? `<span class="st">${esc(i.state)}</span>` : ""}${i.kind === "call" && ["D", "R", "I"].includes(i.party) ? `<span class="pty ${i.party}" title="Winner's party, as read from the post">${i.party}</span>` : ""}</div>
